@@ -32,9 +32,22 @@ error check params
  *    c(), r(), u(), d() aliases for the above
  *    all
  *
- * COUNT(), AVG(), AND SUM() functions should be called as part of the action string
- *  e.g. $action = 'select AVG(price)';
- * Likewise with SELECT ... INTO
+ *
+ *  Example queries:
+ *    all('products')
+ *      'SELECT * FROM products'
+ *    select(['id', 'name', 'price'], 'products', ['price', '>', 1000])
+ *      'SELECT id, name, price from products where price > 1000'
+ *    c('users', ['name' => 'mersault', 'email' => 'ennui@gmail.com'])
+ *      'INSERT INTO users (name, email) VALUES (?, ?)'
+ *
+ *  more examples in app.php
+ *
+ *
+ *
+ *  COUNT(), AVG(), AND SUM() functions should be called as part of the action string
+ *    e.g. $action = 'select AVG(price)';
+ *  Likewise with SELECT ... INTO
  */
 
 class SQL {
@@ -257,66 +270,4 @@ class SQL {
     return $this->qDelete($table, $where);
   }
 
-
  }
-
-
- $sql = new SQL();
-
- $a = $sql->all('products');
- // 'SELECT * FROM products'
-
- $b = $sql->r('SELECT MAX(age)', 'customers', ['id', 'IN', [42,56,67,78]]);
-// 'SELECT MAX(age) FROM customers WHERE id IN (42, 56, 67, 78)'
-
-
-
- $where = [
- 	['id', 'IN', [43,56,67,78]],
- 	'AND' => ['country', '=', 'Vietnam'],
- 	'OR' => ['status', '>', 3]
- ];
- $c = $sql->r(['id', 'name', 'email'], 'users', $where);
- var_dump($c);
- // note the lack of single quotes in condition
- // 'SELECT id, name, email FROM users WHERE id IN (43, 56, 67, 78) AND country = Vietnam OR status > 3'
-
-
- // TODO true value for DESC looks a little magic; find a more readable param
- $d = $sql->r('SELECT *', 'products', ['id', 'BETWEEN', 42, 56], [ ['id', true], 'name', 'collection' ] );
-// 'SELECT * FROM products WHERE id BETWEEN 42 AND 56 ORDER BY id DESC, name ASC, collection ASC'
-
-
-// complex queries need to pass an object
-
- $join = new stdClass();
- $join->type = 'LEFT';
- $join->table = 'customers';
- $join->condition = ['customers.id', '=', 'product.customer'];
-
- $query = new stdClass();
- $query->action = 'SELECT *';
- $query->table = 'products';
- $query->where = ['products.id', 'BETWEEN', 42, 142];
- $query->orderBy = [ ['products.id', true], 'products.name', 'products.collection' ];
- $query->join = $join;
-
-
- $d = $sql->r($query);
- //   'SELECT * FROM products
- //    LEFT JOIN customers
- //    ON customers.id = product.customer
- //    WHERE products.id BETWEEN 42 AND 142
- //    ORDER BY products.id DESC, products.name ASC, products.collection ASC'
-
-
-
-
-
- $where = [
- 	['id', 'BETWEEN', 900, 1000],
- 	'AND' => ['collection', '=', 'Vintage'],
- 	'OR' => ['id', '>', 970]
- ];
- $c = $sql->r(['id', 'name', 'collection'], 'products', $where);
- var_dump($c);
