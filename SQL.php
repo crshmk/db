@@ -65,7 +65,7 @@ class SQL {
    * @param string
    */
   private function chopComma($s) {
-  return rtrim(trim($s), ',');
+    return rtrim(trim($s), ',');
   }
 
   /**
@@ -75,7 +75,7 @@ class SQL {
    * @return string
    */
   private function csv($a) {
-  return implode(', ', $a);
+    return implode(', ', $a);
   }
 
   /**
@@ -146,33 +146,33 @@ class SQL {
   /**
    * Add WHERE EXISTS clause
    */
-  private function sqlExists($query) {
+  private function exists($query) {
     return ' WHERE EXISTS (' . $this->select($query) . ')';
   }
 
   /**
-   *  Handle configuration passed as object
+   *  Allow config passed as object
    */
-  private function sqlFromObject($q) {
+  private function fromObject($q) {
     $a = is_array($q->action) ? 'SELECT ' . $this->csv($q->action) : $q->action;
     $sql = $a . ' FROM ' . $q->table;
     $sql .= isset($q->join) ? $this->join($q->join) : '';
     $sql .= isset($q->where) ? $this->condition($q->where) : '';
     $sql .= isset($q->groupBy) ? $this->concat('GROUP BY', $q->groupBy) : '';
     $sql .= isset($q->having) ? $this->concat('HAVING', $q->groupBy) : '';
-    $sql .= isset($q->orderBy) ? $this->sqlOrderBy($q->orderBy) : '';
+    $sql .= isset($q->orderBy) ? $this->orderBy($q->orderBy) : '';
     return $sql;
   }
 
   /**
    * Add ORDER BY clause
    */
-  private function sqlOrderBy($orderBy) {
+  private function orderBy($orderBy) {
     $sql = ' ORDER BY';
     foreach($orderBy as $ob) {
-    $sql .= (count($ob) > 1) ? " {$ob[0]} DESC," : " {$ob} ASC,";
-  }
-  return $this->chopComma($sql);
+      $sql .= (count($ob) > 1) ? " {$ob[0]} DESC," : " {$ob} ASC,";
+    }
+    return $this->chopComma($sql);
   }
 
   /**
@@ -195,7 +195,7 @@ class SQL {
    */
   public function select($action, $table = '', $where = [], $orderBy = []) {
   if (is_object($action)) {
-    return $this->sqlFromObject($action);
+    return $this->fromObject($action);
   }
 
   // pass multiple selects as an array
@@ -206,7 +206,7 @@ class SQL {
 
   $sql = "{$action} FROM {$table}";
   $sql .= count($where) ? $this->condition($where) : '';
-  $sql .= count($orderBy) ? $this->sqlOrderBy($orderBy) : '';
+  $sql .= count($orderBy) ? $this->orderBy($orderBy) : '';
 
   return $sql;
   }
