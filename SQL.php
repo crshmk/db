@@ -22,9 +22,16 @@ error check params
 */
 
 /**
- * Create sql query string for CRUD operations
+ *  Create sql query string for CRUD operations
  *
- * select()
+ *  Exposes the following methods:
+ *    select
+ *    insert
+ *    update
+ *    qDelete
+ *    c(), r(), u(), d() aliases for the above
+ *    all
+ *
  * COUNT(), AVG(), AND SUM() functions should be called as part of the action string
  *  e.g. $action = 'select AVG(price)';
  * Likewise with SELECT ... INTO
@@ -100,7 +107,8 @@ class SQL {
     return $sql;
   }
 
-    $w[1] = trim($w[1]);
+  // operator is passed in position [1]
+  $w[1] = trim($w[1]);
 
   $sql = $isWhere ? " WHERE {$w[0]} " : " {$w[0]} " ;
   switch($w[1]) {
@@ -110,13 +118,13 @@ class SQL {
     break;
     case 'BETWEEN':
   case 'NOT BETWEEN':
-  $sql .= "{$w[1]} {$w[2]} AND {$w[3]} ";
+  $sql .= "{$w[1]} '{$w[2]}' AND '{$w[3]}' ";
   break;
   case 'IS NULL':
   case 'IS NOT NULL':
     $sql .= $w[1];
     default:
-    $sql .= "{$w[1]} {$w[2]}";
+    $sql .= "{$w[1]} '{$w[2]}'";
   }
   return $sql;
   }
@@ -250,15 +258,12 @@ class SQL {
   }
 
 
-
-
  }
 
 
  $sql = new SQL();
 
  $a = $sql->all('products');
- var_dump($a);
  // 'SELECT * FROM products'
 
  $b = $sql->r('SELECT MAX(age)', 'customers', ['id', 'IN', [42,56,67,78]]);
@@ -303,3 +308,15 @@ class SQL {
  //    ON customers.id = product.customer
  //    WHERE products.id BETWEEN 42 AND 142
  //    ORDER BY products.id DESC, products.name ASC, products.collection ASC'
+
+
+
+
+
+ $where = [
+ 	['id', 'BETWEEN', 900, 1000],
+ 	'AND' => ['collection', '=', 'Vintage'],
+ 	'OR' => ['id', '>', 970]
+ ];
+ $c = $sql->r(['id', 'name', 'collection'], 'products', $where);
+ var_dump($c);
