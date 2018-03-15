@@ -61,13 +61,11 @@ $q->orderBy = [ ['products.id', true], 'products.name', 'products.collection' ];
 $q->join = $join;
 
 $d = $sql->r($q);
-var_dump($d);
-//   'SELECT * FROM products
-//    LEFT JOIN customers
-//    ON customers.id = product.customer
-//    WHERE products.id BETWEEN 42 AND 142
-//    ORDER BY products.id DESC, products.name ASC, products.collection ASC'
-
+//  SELECT products.id, products.name, images.filename
+//  FROM products
+//  LEFT JOIN images ON products.id = 'images.product'
+//  WHERE products.id BETWEEN '42' AND '142'
+//  ORDER BY products.id DESC, products.name ASC, products.collection ASC
 
 /*
   insert (aliased as c)

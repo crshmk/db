@@ -3,6 +3,7 @@
 
 /*
 TODO:
+single quotes occur around JOIN condition; edit condition() to account
 add logic for passing array of params; old class handles all in one fn
 check functionality for passing ? or string value
 put quotes around condition args
@@ -38,7 +39,7 @@ error check params
  *      'SELECT * FROM products'
  *    select(['id', 'name', 'price'], 'products', ['price', '>', 1000])
  *      'SELECT id, name, price from products where price > 1000'
- *    c('users', ['name' => 'mersault', 'email' => 'ennui@gmail.com'])
+ *    insert('users', ['name' => 'mersault', 'email' => 'ennui@gmail.com'])
  *      'INSERT INTO users (name, email) VALUES (?, ?)'
  *
  *  more examples in app.php
@@ -153,7 +154,8 @@ class SQL {
    *  Handle configuration passed as object
    */
   private function sqlFromObject($q) {
-    $sql = $q->action . ' FROM ' . $q->table;
+    $a = is_array($q->action) ? 'SELECT ' . $this->csv($q->action) : $q->action;
+    $sql = $a . ' FROM ' . $q->table;
     $sql .= isset($q->join) ? $this->join($q->join) : '';
     $sql .= isset($q->where) ? $this->condition($q->where) : '';
     $sql .= isset($q->groupBy) ? $this->concat('GROUP BY', $q->groupBy) : '';
@@ -172,8 +174,6 @@ class SQL {
   }
   return $this->chopComma($sql);
   }
-
-
 
   /**
    *  Add GROUP BY or HAVING clause
@@ -194,15 +194,14 @@ class SQL {
    *
    */
   public function select($action, $table = '', $where = [], $orderBy = []) {
-
   if (is_object($action)) {
-  return $this->sqlFromObject($action);
+    return $this->sqlFromObject($action);
   }
 
-    // pass multiple selects as an array
+  // pass multiple selects as an array
   if (is_array($action)) {
-  $select = 'SELECT ' . $this->csv($action);
-  return $this->select($select, $table, $where, $orderBy);
+    $select = 'SELECT ' . $this->csv($action);
+    return $this->select($select, $table, $where, $orderBy);
   }
 
   $sql = "{$action} FROM {$table}";
